@@ -39,6 +39,7 @@ public class MultiLevelListView extends FrameLayout {
 
     private MultiLevelListAdapter mAdapter;
     private OnItemClickListener mOnItemClickListener;
+    private OnItemLongClickListener mOnItemLongClickListener;
 
     /**
      * View constructor.
@@ -123,6 +124,7 @@ public class MultiLevelListView extends FrameLayout {
 
         addView(mListView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         mListView.setOnItemClickListener(new OnProxyItemClickListener());
+        mListView.setOnItemLongClickListener(new OnProxyItemLongClickListener());
     }
 
     /**
@@ -183,6 +185,15 @@ public class MultiLevelListView extends FrameLayout {
     }
 
     /**
+     * Sets list item long click callback listener.
+     *
+     * @param listener Callback listener.
+     */
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        mOnItemLongClickListener = listener;
+    }
+
+    /**
      * Notifies adapter that data set changed.
      */
     private void notifyDataSetChanged() {
@@ -196,7 +207,7 @@ public class MultiLevelListView extends FrameLayout {
      *
      * @return Wrapped Android ListView instance.
      */
-    ListView getListView() {
+    public ListView getListView() {
         return mListView;
     }
 
@@ -287,6 +298,45 @@ public class MultiLevelListView extends FrameLayout {
             } else {
                 onItemClicked(view, node);
             }
+        }
+    }
+
+
+    /**
+     * Helper class used to display created flat list of item's using Android's ListView.
+     */
+    class OnProxyItemLongClickListener implements AdapterView.OnItemLongClickListener {
+
+        /**
+         * Notifies that certain node was long clicked.
+         *
+         * @param view Clicked view (provided by the adapter).
+         * @param node Clicked node.
+         */
+        private void notifyItemClicked(View view, Node node) {
+            if (mOnItemLongClickListener != null) {
+                mOnItemLongClickListener.onItemLongClicked(MultiLevelListView.this, view, node.getObject(), node.getItemInfo());
+            }
+        }
+
+        /**
+         * Handles certain node long click event.
+         *
+         * @param view Clicked view (provided by the adapter).
+         * @param node Clicked node
+         */
+        private void onItemLongClicked(View view, Node node) {
+            notifyItemClicked(view, node);
+        }
+
+        /**
+         * Handles wrapped Android ListView item long click event.
+         */
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
+            Node node = mAdapter.getFlatItems().get(position);
+            onItemLongClicked(view, node);
+            return false;
         }
     }
 }
