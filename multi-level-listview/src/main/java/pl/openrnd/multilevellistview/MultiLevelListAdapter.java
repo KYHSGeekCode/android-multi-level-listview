@@ -326,6 +326,23 @@ public abstract class MultiLevelListAdapter {
      * Add item to some node.
      * @param obj
      * @param flatPos
+     * @param isSubNode
+     * @return
+     */
+    public boolean addItem(Object obj, int flatPos, boolean isSubNode) {
+        if (flatPos < 0 || flatPos >= mFlatItems.size())
+            return false;
+        Node parentNode = mFlatItems.get(flatPos);
+        if (!isSubNode) {
+            parentNode = (parentNode != null) ? parentNode.getParent() : mRoot;
+        }
+        return addItem(obj, parentNode);
+    }
+
+    /**
+     * Add item to some node.
+     * @param obj
+     * @param flatPos
      * @return
      */
     public boolean addItem(Object obj, int flatPos) {
