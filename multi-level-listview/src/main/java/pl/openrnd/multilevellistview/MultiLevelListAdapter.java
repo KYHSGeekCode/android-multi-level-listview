@@ -213,12 +213,57 @@ public abstract class MultiLevelListAdapter {
      * @param node The node.
      * @param nestTyp NestType value.
      */
-    void extendNode(Node node, NestType nestTyp) {
+    public void extendNode(Node node, NestType nestTyp) {
         node.setSubNodes(createNodeListFromDataItems(getSubObjects(node.getObject()), node));
         if (nestTyp == NestType.SINGLE) {
             clearPathToNode(node);
         }
         notifyDataSetChanged();
+    }
+
+    /**
+     * Extends node and subnodes (recursively).
+     *
+     * Adds sub-nodes to the nodes.
+     *
+     * @param node The node.
+     * @param nestTyp NestType value.
+     */
+    public void extendNodeSubnodes(Node node, NestType nestTyp) {
+        extendNode(node);
+        if (nestTyp == NestType.SINGLE) {
+            clearPathToNode(node);
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     *
+     * @param pos
+     * @param nestTyp
+     */
+    public void extendNodeSubnodes(int pos, NestType nestTyp) {
+        Node node = mFlatItems.get(pos);
+        if (node != null) {
+            extendNodeSubnodes(node, nestTyp);
+        }
+    }
+
+    /**
+     * Only extends node and subnodes (recursively).
+     *
+     * Adds sub-nodes to the nodes.
+     *
+     * @param node The node.
+     */
+    private void extendNode(Node node) {
+        List<Node> subNodes = createNodeListFromDataItems(getSubObjects(node.getObject()), node);
+        node.setSubNodes(subNodes);
+        for (Node subNode : subNodes) {
+            if (subNode.isExpandable()) {
+                extendNode(subNode);
+            }
+        }
     }
 
     /**
@@ -228,7 +273,7 @@ public abstract class MultiLevelListAdapter {
      *
      * @param node The node
      */
-    void collapseNode(Node node) {
+    public void collapseNode(Node node) {
         node.clearSubNodes();
         notifyDataSetChanged();
     }
