@@ -277,6 +277,30 @@ public abstract class MultiLevelListAdapter {
         return false;
     }
 
+    /**
+     * Delete item.
+     * @param flatPos
+     * @return
+     */
+    public boolean deleteItem(int flatPos) {
+        if (flatPos < 0 || flatPos >= mFlatItems.size())
+            return false;
+        Node node = mFlatItems.get(flatPos);
+        if (node != null && node.getParent() != null) {
+            List<Node> subNodes = node.getParent().getSubNodes();
+            if (subNodes.size() > 0) {
+                subNodes.remove(node);
+                notifyDataSetChanged();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return
+     */
     protected ListView getListView() {
         return mView.getListView();
     }
