@@ -34,5 +34,5 @@ public interface OnItemLongClickListener {
      * @param itemInfo ItemInfo object with information about the clicked object and its location
      *                 on the list
      */
-    void onItemLongClicked(MultiLevelListView parent, View view, Object item, ItemInfo itemInfo);
+    void onItemLongClicked(MultiLevelListView parent, View view, Object item, ItemInfo itemInfo, int pos);
 }

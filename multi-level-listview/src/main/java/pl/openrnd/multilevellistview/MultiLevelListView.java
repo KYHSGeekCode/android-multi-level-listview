@@ -313,9 +313,9 @@ public class MultiLevelListView extends FrameLayout {
          * @param view Clicked view (provided by the adapter).
          * @param node Clicked node.
          */
-        private void notifyItemLongClicked(View view, Node node) {
+        private void notifyItemLongClicked(View view, Node node, int pos) {
             if (mOnItemLongClickListener != null) {
-                mOnItemLongClickListener.onItemLongClicked(MultiLevelListView.this, view, node.getObject(), node.getItemInfo());
+                mOnItemLongClickListener.onItemLongClicked(MultiLevelListView.this, view, node.getObject(), node.getItemInfo(), pos);
             }
         }
 
@@ -325,8 +325,8 @@ public class MultiLevelListView extends FrameLayout {
          * @param view Clicked view (provided by the adapter).
          * @param node Clicked node
          */
-        private void onItemLongClicked(View view, Node node) {
-            notifyItemLongClicked(view, node);
+        private void onItemLongClicked(View view, Node node, int pos) {
+            notifyItemLongClicked(view, node, pos);
         }
 
         /**
@@ -335,7 +335,7 @@ public class MultiLevelListView extends FrameLayout {
         @Override
         public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
             Node node = mAdapter.getFlatItems().get(position);
-            onItemLongClicked(view, node);
+            onItemLongClicked(view, node, position);
             return false;
         }
     }

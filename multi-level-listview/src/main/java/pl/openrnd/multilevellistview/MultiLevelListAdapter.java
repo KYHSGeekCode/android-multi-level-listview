@@ -24,6 +24,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public abstract class MultiLevelListAdapter {
     private List<Object> mSourceData = new ArrayList<>();
     private ProxyAdapter mProxyAdapter = new ProxyAdapter();
 
-    /**
+    /**.
      * Indicates if object is expandable.
      *
      * @param object The object.
@@ -64,7 +65,7 @@ public abstract class MultiLevelListAdapter {
      * @param itemInfo The InfoItem object with information about item location in MultiLevelListView.
      * @return The view that reflects the object.
      */
-    protected abstract View getViewForObject(Object object, View convertView, ItemInfo itemInfo);
+    protected abstract View getViewForObject(Object object, View convertView, ItemInfo itemInfo, int pos);
 
     /**
      * Sets initial data items to be displayed in attached MultiLevelListView.
@@ -252,6 +253,30 @@ public abstract class MultiLevelListAdapter {
         }
     }
 
+    /**
+     * Swap two items in flat list.
+     * @param flatPos Position in flat list
+     * @param nodePos Position in node
+     * @param nodePos2 Position in node
+     * @return
+     */
+    public boolean swapItems(int flatPos, int nodePos, int nodePos2) {
+        if (flatPos < 0 || flatPos >= mFlatItems.size()
+                || nodePos < 0 || nodePos2 < 0 || nodePos == nodePos2)
+            return false;
+        Node node = mFlatItems.get(flatPos);
+        if (node != null && node.getParent() != null) {
+            List<Node> subNodes = node.getParent().getSubNodes();
+            int size = subNodes.size();
+            if (nodePos < size && nodePos2 < size) {
+                Collections.swap(subNodes, nodePos, nodePos2);
+                notifyDataSetChanged();
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected ListView getListView() {
         return mView.getListView();
     }
@@ -279,7 +304,7 @@ public abstract class MultiLevelListAdapter {
         @Override
         public View getView(int i, View convertView, ViewGroup viewGroup) {
             Node node = mFlatItems.get(i);
-            return getViewForObject(node.getObject(), convertView, node.getItemInfo());
+            return getViewForObject(node.getObject(), convertView, node.getItemInfo(), i);
         }
     }
 }
