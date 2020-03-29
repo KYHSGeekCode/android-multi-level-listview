@@ -104,6 +104,14 @@ class Node {
     }
 
     /**
+     * Set wrapped object.
+     * @param object
+     */
+    void setObject(Object object) {
+        mObject = object;
+    }
+
+    /**
      * Gets info if node is expanded.
      *
      * @return true if node is expanded, false otherwise.

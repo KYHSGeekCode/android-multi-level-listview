@@ -58,6 +58,13 @@ public abstract class MultiLevelListAdapter {
     protected abstract List<?> getSubObjects(Object object);
 
     /**
+     *
+     * @param object
+     * @return
+     */
+    protected abstract Object getParent(Object object);
+
+    /**
      * Gets view configured to display the object.
      *
      * @param object The object.
@@ -119,8 +126,12 @@ public abstract class MultiLevelListAdapter {
         List<Node> result = new ArrayList<>();
         if (dataItems != null) {
             for (Object dataItem : dataItems) {
-                boolean isExpandable = isExpandable(dataItem);
 
+                if (parent == mRoot) {
+                    mRoot.setObject(getParent(dataItem));
+                }
+
+                boolean isExpandable = isExpandable(dataItem);
                 Node node = new Node(dataItem, parent);
                 node.setExpandable(isExpandable);
                 if (mView.isAlwaysExpanded() && isExpandable) {
@@ -324,52 +335,48 @@ public abstract class MultiLevelListAdapter {
 
     /**
      * Add item to some node.
-     * @param obj
-     * @param flatPos
-     * @param isSubNode
+     * @param flatPos position of node on which need to create a new node. May be parent or adjacent
+     * @param isSubNode is branch {@param flatPos} parent
      * @return
      */
-    public boolean addItem(Object obj, int flatPos, boolean isSubNode) {
+    public boolean addItem(int flatPos, boolean isSubNode) {
         if (flatPos < 0 || flatPos >= mFlatItems.size())
             return false;
         Node parentNode = mFlatItems.get(flatPos);
         if (!isSubNode) {
             parentNode = (parentNode != null) ? parentNode.getParent() : mRoot;
         }
-        return addItem(obj, parentNode);
+        return addItem(parentNode);
     }
 
     /**
      * Add item to some node.
-     * @param obj
      * @param flatPos
      * @return
      */
-    public boolean addItem(Object obj, int flatPos) {
+    public boolean addItem(int flatPos) {
         if (flatPos < 0 || flatPos >= mFlatItems.size())
             return false;
         Node parentNode = mFlatItems.get(flatPos);
-        return addItem(obj, parentNode);
+        return addItem(parentNode);
     }
 
     /**
      * Add item to the root.
-     * @param obj
      * @return
      */
-    public boolean addItem(Object obj) {
-        return addItem(obj, mRoot);
+    public boolean addItem() {
+        return addItem(mRoot);
     }
 
     /**
-     * Add item to some node.
-     * @param obj
+     * Update the subNodes list of {@param parentNode} to add the new node and expand it.
      * @param parentNode
      * @return
      */
-    public boolean addItem(Object obj, Node parentNode) {
-        Node node = new Node(obj, parentNode);
-        parentNode.getSubNodes().add(node);
+    public boolean addItem(Node parentNode) {
+        parentNode.setSubNodes(createNodeListFromDataItems(getSubObjects(parentNode.getObject()), parentNode));
+        parentNode.setExpandable(true);
         notifyDataSetChanged();
         return true;
     }
