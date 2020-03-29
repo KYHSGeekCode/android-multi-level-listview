@@ -394,6 +394,10 @@ public abstract class MultiLevelListAdapter {
             List<Node> subNodes = node.getParent().getSubNodes();
             if (subNodes.size() > 0) {
                 subNodes.remove(node);
+
+                if (subNodes.isEmpty())
+                    node.getParent().setExpandable(false);
+
                 notifyDataSetChanged();
                 return true;
             }
