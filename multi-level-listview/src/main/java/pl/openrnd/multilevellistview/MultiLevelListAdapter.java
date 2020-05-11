@@ -26,6 +26,7 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Base adapter to be used for MultiLevelListView.
@@ -89,6 +90,20 @@ public abstract class MultiLevelListAdapter {
         notifyDataSetChanged();
     }
 
+    public void setDataItems(List<?> dataItems, Stack<?> expandItems) {
+        checkState();
+
+        mSourceData = new ArrayList<>();
+        mSourceData.addAll(dataItems);
+
+        if (expandItems != null) {
+            mRoot.setSubNodes(createNodeListFromDataItems(mSourceData, mRoot, expandItems));
+        } else {
+            mRoot.setSubNodes(createNodeListFromDataItems(mSourceData, mRoot));
+        }
+        notifyDataSetChanged();
+    }
+
     /**
      * Notifies adapter that data set changed.
      */
@@ -136,6 +151,33 @@ public abstract class MultiLevelListAdapter {
                 node.setExpandable(isExpandable);
                 if (mView.isAlwaysExpanded() && isExpandable) {
                     node.setSubNodes(createNodeListFromDataItems(getSubObjects(node.getObject()), node));
+                }
+                result.add(node);
+            }
+        }
+        return result;
+    }
+
+    private List<Node> createNodeListFromDataItems(List<?> dataItems, Node parent, Stack<?> expandItems) {
+        Object expandItem = (expandItems != null && !expandItems.empty()) ? expandItems.pop() : null;
+        List<Node> result = new ArrayList<>();
+        if (dataItems != null) {
+            for (Object dataItem : dataItems) {
+
+                if (parent == mRoot) {
+                    mRoot.setObject(getParent(dataItem));
+                }
+
+                boolean isExpandable = isExpandable(dataItem);
+                Node node = new Node(dataItem, parent);
+                node.setExpandable(isExpandable);
+                if (isExpandable && (mView.isAlwaysExpanded() || expandItem != null)) {
+                    if (expandItem != null) {
+                        node.setSubNodes(createNodeListFromDataItems(getSubObjects(node.getObject()), node, expandItems));
+                    } else {
+                        node.setSubNodes(createNodeListFromDataItems(getSubObjects(node.getObject()), node));
+                    }
+
                 }
                 result.add(node);
             }
