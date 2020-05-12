@@ -81,15 +81,14 @@ public abstract class MultiLevelListAdapter {
      * @param dataItems The list with data items.
      */
     public void setDataItems(List<?> dataItems) {
-        checkState();
-
-        mSourceData = new ArrayList<>();
-        mSourceData.addAll(dataItems);
-
-        mRoot.setSubNodes(createNodeListFromDataItems(mSourceData, mRoot));
-        notifyDataSetChanged();
+        setDataItems(dataItems, null);
     }
 
+    /**
+     * Sets initial data items to be displayed in attached MultiLevelListView and expand passed hierarchy of nodes.
+     *
+     * @param dataItems The list with data items.
+     */
     public void setDataItems(List<?> dataItems, Stack<?> expandItems) {
         checkState();
 
@@ -141,11 +140,9 @@ public abstract class MultiLevelListAdapter {
         List<Node> result = new ArrayList<>();
         if (dataItems != null) {
             for (Object dataItem : dataItems) {
-
                 if (parent == mRoot) {
                     mRoot.setObject(getParent(dataItem));
                 }
-
                 boolean isExpandable = isExpandable(dataItem);
                 Node node = new Node(dataItem, parent);
                 node.setExpandable(isExpandable);
@@ -158,26 +155,31 @@ public abstract class MultiLevelListAdapter {
         return result;
     }
 
+    /**
+     * Creates list of nodes for data items provided to adapter and expand passed hierarchy of nodes.
+     *
+     * @param dataItems
+     * @param parent
+     * @param expandItems
+     * @return
+     */
     private List<Node> createNodeListFromDataItems(List<?> dataItems, Node parent, Stack<?> expandItems) {
-        Object expandItem = (expandItems != null && !expandItems.empty()) ? expandItems.pop() : null;
+        Object expandItem = (expandItems != null && expandItems.size() > 1) ? expandItems.pop() : null;
         List<Node> result = new ArrayList<>();
         if (dataItems != null) {
             for (Object dataItem : dataItems) {
-
                 if (parent == mRoot) {
                     mRoot.setObject(getParent(dataItem));
                 }
-
                 boolean isExpandable = isExpandable(dataItem);
                 Node node = new Node(dataItem, parent);
                 node.setExpandable(isExpandable);
-                if (isExpandable && (mView.isAlwaysExpanded() || expandItem != null)) {
-                    if (expandItem != null) {
+                if (isExpandable && (mView.isAlwaysExpanded() || dataItem == expandItem)) {
+                    if (dataItem == expandItem) {
                         node.setSubNodes(createNodeListFromDataItems(getSubObjects(node.getObject()), node, expandItems));
                     } else {
                         node.setSubNodes(createNodeListFromDataItems(getSubObjects(node.getObject()), node));
                     }
-
                 }
                 result.add(node);
             }
