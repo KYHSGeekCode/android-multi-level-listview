@@ -321,6 +321,42 @@ public abstract class MultiLevelListAdapter {
         }
     }
 
+    public int extendToNode(Object nodeObj, Stack<Object> expandItems) {
+        if (nodeObj == null) {
+            return -1;
+        }
+        if (nodeObj == mRoot.getObject()) {
+            return -2;
+        }
+        if (expandItems == null) {
+            expandItems = new Stack<>();
+        }
+
+        Object nextNodeObj;
+        int flatPos = getPosFromObject(nodeObj);
+        if (flatPos < 0) {
+            // add to stack
+            expandItems.push(nodeObj);
+            nextNodeObj = getParent(nodeObj);
+        } else {
+            if (expandItems.size() == 0) {
+                // finish
+                mProxyAdapter.notifyDataSetChanged();
+                return flatPos;
+            } else {
+                // expand node
+                Node node = mFlatItems.get(flatPos);
+                node.setSubNodes(createNodeListFromDataItems(getSubObjects(node.getObject()), node));
+
+                // update flat list (add new node subnodes)
+                mFlatItems = createItemsForCurrentStat();
+                // get from stack
+                nextNodeObj = expandItems.pop();
+            }
+        }
+        return extendToNode(nextNodeObj, expandItems);
+    }
+
     /**
      * Collapse node.
      *
@@ -393,16 +429,22 @@ public abstract class MultiLevelListAdapter {
         return addItem(parentNode);
     }
 
+    public boolean addItem(Object parentNodeObj) {
+        Stack<Object> expandHierarchy = new Stack<>();
+        int flatPos = extendToNode(parentNodeObj, expandHierarchy);
+        if (flatPos == -2) {
+            return addItem(mRoot);
+        }
+        return addItem(flatPos, true);
+    }
+
     /**
      * Add item to some node.
      * @param flatPos
      * @return
      */
     public boolean addItem(int flatPos) {
-        if (flatPos < 0 || flatPos >= mFlatItems.size())
-            return false;
-        Node parentNode = mFlatItems.get(flatPos);
-        return addItem(parentNode);
+        return addItem(flatPos, true);
     }
 
     /**
@@ -447,6 +489,19 @@ public abstract class MultiLevelListAdapter {
             }
         }
         return false;
+    }
+
+    /**
+     * Get node position by object.
+     * @param nodeObj
+     * @return
+     */
+    private int getPosFromObject(Object nodeObj) {
+        for (int i = 0; i < mFlatItems.size(); i++) {
+            if (mFlatItems.get(i).getObject() == nodeObj)
+                return i;
+        }
+        return -1;
     }
 
     /**
