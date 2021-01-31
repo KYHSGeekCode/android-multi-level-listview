@@ -370,6 +370,23 @@ public abstract class MultiLevelListAdapter {
     }
 
     /**
+     * Toggle node is expanded/collapsed.
+     * @param flatPos
+     */
+    public void toggleNodeExpand(int flatPos) {
+        if (flatPos < 0 || flatPos >= mFlatItems.size())
+            return;
+        Node node = mFlatItems.get(flatPos);
+        if (node == null)
+            return;
+        if (node.isExpanded()) {
+            collapseNode(node);
+        } else {
+            extendNode(node, NestType.MULTIPLE);
+        }
+    }
+
+    /**
      * Collapse any extended way not leading to the node.
      *
      * @param node The node.
@@ -502,6 +519,21 @@ public abstract class MultiLevelListAdapter {
                 return i;
         }
         return -1;
+    }
+
+    /**
+     * Get node is expanded.
+     * @param flatPos
+     * @return
+     */
+    public boolean isExpanded(int flatPos) {
+        if (flatPos < 0 || flatPos >= mFlatItems.size())
+            return false;
+        Node node = mFlatItems.get(flatPos);
+        if (node != null) {
+            return node.isExpanded();
+        }
+        return false;
     }
 
     /**
